@@ -1,16 +1,16 @@
 <template>
   <div>
-    <quizOne />
+    <QuizOne />
     <!-- <quizTwo v-if="showNext"/> -->
   </div>
 </template>
 
 <script>
-import quizOne from "./quizOne.vue";
+import QuizOne from "./QuizOne.vue";
 export default {
   name: "Display",
   components: {
-    quizOne,
+    QuizOne,
   },
   data() {
     return {
