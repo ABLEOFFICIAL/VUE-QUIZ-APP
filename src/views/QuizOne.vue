@@ -9,7 +9,10 @@
       </div>
     </div>
     <div class="display-block">
-      <div class="display" v-if="quizes[currentQuizIndex]">
+      <div
+        class="display"
+        v-if="quizes[currentQuizIndex] && !showSwipeQuestion"
+      >
         <h2 class="question">{{ quizes[currentQuizIndex].question }}</h2>
         <!-- cards containers -->
         <div class="options">
@@ -32,6 +35,25 @@
           </div>
         </div>
         <button @click="goToNext()">{{ button }}</button>
+      </div>
+      <div v-else>
+        <div class="swipe-question">
+          <h2 class="swipe-title">{{ swipeData.title }}</h2>
+          <div class="card-stack">
+            <div
+              class="card"
+              v-for="(card, index) in swipeData.cards"
+              :key="index"
+              :class="{ fade: 'card.remove' }"
+            >
+              <p>{{ card.text }}</p>
+            </div>
+          </div>
+          <div class="swipe-controls">
+            <button @click="swipeLeft(index)">← Physical Change</button>
+            <button @click="swipeRight">Chemical Change →</button>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -88,50 +110,6 @@ export default {
                 "A solid is characterized by its definite shape and volume.",
               flip: false,
               correct: false,
-            },
-          ],
-        },
-        {
-          question: "Which of these are renewable sources of energy?",
-          options: [
-            {
-              id: 1,
-              name: "Solar",
-              image: "../assets/solar.png",
-              descriptionTitle: "Solar Energy",
-              description:
-                "Solar energy is harnessed from the sun and is renewable.",
-              flip: false,
-              correct: true,
-            },
-            {
-              id: 2,
-              name: "Wind",
-              image: "../assets/wind.png",
-              descriptionTitle: "Wind Energy",
-              description:
-                "Wind energy is renewable and is captured using turbines.",
-              flip: false,
-              correct: true,
-            },
-            {
-              id: 3,
-              name: "Coal",
-              image: "../assets/coal.png",
-              descriptionTitle: "Coal",
-              description: "Coal is a fossil fuel and is not renewable.",
-              flip: false,
-              correct: false,
-            },
-            {
-              id: 4,
-              name: "Hydropower",
-              image: "../assets/hydro.png",
-              descriptionTitle: "Hydropower",
-              description:
-                "Hydropower uses moving water to generate electricity and is renewable.",
-              flip: false,
-              correct: true,
             },
           ],
         },
@@ -221,15 +199,68 @@ export default {
             },
           ],
         },
+        {
+          question: "Which of these are renewable sources of energy?",
+          options: [
+            {
+              id: 1,
+              name: "Solar",
+              image: "../assets/solar.png",
+              descriptionTitle: "Solar Energy",
+              description:
+                "Solar energy is harnessed from the sun and is renewable.",
+              flip: false,
+              correct: true,
+            },
+            {
+              id: 2,
+              name: "Wind",
+              image: "../assets/wind.png",
+              descriptionTitle: "Wind Energy",
+              description:
+                "Wind energy is renewable and is captured using turbines.",
+              flip: false,
+              correct: true,
+            },
+            {
+              id: 3,
+              name: "Coal",
+              image: "../assets/coal.png",
+              descriptionTitle: "Coal",
+              description: "Coal is a fossil fuel and is not renewable.",
+              flip: false,
+              correct: false,
+            },
+            {
+              id: 4,
+              name: "Hydropower",
+              image: "../assets/hydro.png",
+              descriptionTitle: "Hydropower",
+              description:
+                "Hydropower uses moving water to generate electricity and is renewable.",
+              flip: false,
+              correct: true,
+            },
+          ],
+        },
       ],
+      showSwipeQuestion: false,
+      clickedPhysicalState: [],
+      clickedChemicalState: [],
+      index: 0,
+      swipeData: {
+        title: "Tap the arrows to swipe in the direction of the correct change",
+        cards: [
+          { text: "Burning Paper", correct: "Chemical" },
+          { text: "Melting Ice", correct: "Physical" },
+          { text: "Rusting Iron", correct: "Chemical" },
+          { text: "Breaking Glass", correct: "Physical" },
+        ],
+        currentCardIndex: 0,
+      },
     };
   },
   methods: {
-    // store(option) {
-    //   // push clicked option to the clickedOptions array
-    //
-    //   console.log(this.clickedOptions);
-    // },
     toggleFlip(option) {
       option.flip = !option.flip;
       // run a store function to save the clicked option
@@ -254,15 +285,21 @@ export default {
       } else {
         console.log("wrong answer");
       }
-      // this.$emit("next");
-      // console.log(this.correctAnswer);
-      this.currentQuizIndex++;
+
       this.clickedOptions = []; // Clear previous clicked options
-      if (this.currentQuizIndex < this.quizes.length - 1) {
+      if (this.currentQuizIndex === this.quizes.length) {
+        this.showSwipeQuestion = true; //show swipe question after the last flip card
+      } else if (this.currentQuizIndex < this.quizes.length) {
         this.currentQuizIndex++;
       } else {
         console.log("End of quiz");
       }
+    },
+    swipeLeft(index) {
+      this.clickedPhysicalState.push(this.swipeData.cards[index]);
+      this.swipeData.cards.shift();
+      this.swipeData.cards[index].remove = true;
+      // console.log(this.clickedPhysicalState);
     },
   },
 };
@@ -317,24 +354,13 @@ span {
   margin-inline: auto;
   gap: 20px;
 }
-/* .option {
-    background-color: #ff6600;
-    color: #fff;
-    padding: 20px;
-    border-radius: 10px;
-    box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
-    cursor: pointer;
-    height: 12rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-  } */
 .main {
   padding: 20px;
   border-radius: 10px;
   box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   height: 12rem;
+  width: 80%;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -363,6 +389,8 @@ span {
 .front h2 {
   font-size: 20px;
   font-weight: 700;
+  width: 100%;
+  text-align: center;
 }
 .back {
   position: absolute;
@@ -400,5 +428,74 @@ button {
 }
 .flipped {
   transform: rotateY(180deg);
+}
+.swipe-title {
+  text-align: center;
+  width: 80%;
+  margin-inline: auto;
+  margin-bottom: 6rem;
+}
+.card-stack {
+  position: relative;
+  width: 240px;
+  height: 320px;
+  margin: 0 auto;
+  perspective: 1000px;
+}
+
+.card {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 20px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  color: white;
+  font-weight: 600;
+  font-size: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transition: transform 0.4s ease, opacity 0.3s ease;
+}
+.fade {
+  animation: toLeft 0.8s ease, toRight 0.8s ease;
+}
+.card:nth-child(1) {
+  z-index: 3;
+  transform: translateY(0px);
+  background-color: #00c2ff;
+}
+
+.card:nth-child(2) {
+  z-index: 2;
+  transform: translateY(-15px);
+  background-color: #ff0077;
+  opacity: 0.9;
+}
+
+.card:nth-child(3) {
+  z-index: 1;
+  transform: translateY(-30px);
+  background-color: #33ff00;
+  opacity: 0.8;
+}
+.card:nth-child(4) {
+  z-index: 0;
+  transform: translateY(-45px);
+  background-color: #eeff00;
+  opacity: 0.7;
+}
+
+@keyframes toLeft {
+  to {
+    transform: translateX(-20px);
+    opacity: 0.4;
+  }
+}
+@keyframes toRight {
+  to {
+    transform: translateX(20px);
+    opacity: 0.4;
+  }
 }
 </style>
