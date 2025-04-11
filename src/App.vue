@@ -1,7 +1,7 @@
 <template>
   <div>
     <!-- <nav>
-      <router-link to="/"><Start /></router-link> |
+      <router-link to="/"><Modal /></router-link> |
       <router-link to="/Display"><Display /></router-link>
     </nav> -->
     <router-view />
@@ -9,11 +9,11 @@
 </template>
 
 <script>
-import Start from "./views/Modal.vue";
+import Modal from "./views/Modal.vue";
 import Display from "./views/Display.vue";
 
 export default {
-  components: { Start, Display },
+  components: { Modal, Display },
   data() {
     return {};
   },

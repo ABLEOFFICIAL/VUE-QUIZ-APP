@@ -44,17 +44,21 @@
               class="card"
               v-for="(card, index) in swipeData.cards"
               :key="index"
-              :class="{ fade: 'card.remove' }"
+              :class="{
+                'fade-left': card.removeToLeft,
+                'fade-right': card.removeToRight,
+              }"
             >
               <p>{{ card.text }}</p>
             </div>
           </div>
           <div class="swipe-controls">
             <button @click="swipeLeft(index)">← Physical Change</button>
-            <button @click="swipeRight">Chemical Change →</button>
+            <button @click="swipeRight(index)">Chemical Change →</button>
           </div>
         </div>
       </div>
+      <div v-if="finishedCard" class="display-block"></div>
     </div>
   </div>
 </template>
@@ -248,13 +252,34 @@ export default {
       clickedPhysicalState: [],
       clickedChemicalState: [],
       index: 0,
+      finishedCard: false,
       swipeData: {
         title: "Tap the arrows to swipe in the direction of the correct change",
         cards: [
-          { text: "Burning Paper", correct: "Chemical" },
-          { text: "Melting Ice", correct: "Physical" },
-          { text: "Rusting Iron", correct: "Chemical" },
-          { text: "Breaking Glass", correct: "Physical" },
+          {
+            text: "Burning Paper",
+            correct: "Chemical",
+            removeToLeft: false,
+            removeToRight: false,
+          },
+          {
+            text: "Melting Ice",
+            correct: "Physical",
+            removeToLeft: false,
+            removeToRight: false,
+          },
+          {
+            text: "Rusting Iron",
+            correct: "Chemical",
+            removeToLeft: false,
+            removeToRight: false,
+          },
+          {
+            text: "Breaking Glass",
+            correct: "Physical",
+            removeToLeft: false,
+            removeToRight: false,
+          },
         ],
         currentCardIndex: 0,
       },
@@ -297,9 +322,32 @@ export default {
     },
     swipeLeft(index) {
       this.clickedPhysicalState.push(this.swipeData.cards[index]);
-      this.swipeData.cards.shift();
-      this.swipeData.cards[index].remove = true;
-      // console.log(this.clickedPhysicalState);
+      this.swipeData.cards[index].removeToLeft = true;
+      console.log(this.swipeData.cards[index].removeToLeft);
+      console.log(this.swipeData.cards[index].removeToRight);
+
+      // this.swipeData.cards.shift();
+      setTimeout(() => {
+        this.swipeData.cards.shift();
+      }, 500);
+      if (this.swipeData.cards.length === 1) {
+        this.finishedCard = true;
+      }
+      // console.log(this.swipeData.cards[index]);
+    },
+    swipeRight(index) {
+      this.clickedChemicalState.push(this.swipeData.cards[index]);
+      this.swipeData.cards[index].removeToRight = true;
+      // console.log(this.swipeData.cards[index].remove);
+
+      // this.swipeData.cards.shift();
+      setTimeout(() => {
+        this.swipeData.cards.shift();
+      }, 500);
+      if (this.swipeData.cards.length === 1) {
+        this.finishedCard = true;
+      }
+      // console.log(this.swipeData.cards[index]);
     },
   },
 };
@@ -455,10 +503,15 @@ button {
   display: flex;
   justify-content: center;
   align-items: center;
-  transition: transform 0.4s ease, opacity 0.3s ease;
+  transition: all 0.5s ease;
 }
-.fade {
-  animation: toLeft 0.8s ease, toRight 0.8s ease;
+.fade-left {
+  animation: toLeft 0.5s ease;
+  opacity: 0.2;
+}
+.fade-right {
+  animation: toRight 0.5s ease;
+  opacity: 0.2;
 }
 .card:nth-child(1) {
   z-index: 3;
@@ -487,15 +540,21 @@ button {
 }
 
 @keyframes toLeft {
+  from {
+    transform: translateX(0);
+  }
   to {
-    transform: translateX(-20px);
-    opacity: 0.4;
+    transform: translateX(-200px);
+    opacity: 0.2;
   }
 }
 @keyframes toRight {
+  from {
+    transform: translateX(0);
+  }
   to {
-    transform: translateX(20px);
-    opacity: 0.4;
+    transform: translateX(200px);
+    opacity: 0.2;
   }
 }
 </style>
