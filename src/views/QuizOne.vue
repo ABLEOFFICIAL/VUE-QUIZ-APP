@@ -36,7 +36,7 @@
         </div>
         <button @click="goToNext()">{{ button }}</button>
       </div>
-      <div v-else>
+      <div v-else-if="swipe">
         <div class="swipe-question">
           <h2 class="swipe-title">{{ swipeData.title }}</h2>
           <div class="card-stack">
@@ -58,7 +58,10 @@
           </div>
         </div>
       </div>
-      <div v-if="finishedCard" class="display-block"></div>
+      <div v-else-if="finishedCard" class="finished-card display-block">
+        total points: {{ totalPoints }}
+        <router-link to="/" class="start">Restart</router-link>
+      </div>
     </div>
   </div>
 </template>
@@ -71,6 +74,7 @@ export default {
       clickedOptions: [],
       correctAnswer: [],
       currentQuizIndex: 0,
+      swipe: false,
       quizes: [
         {
           question: "Tap to discover states of matter",
@@ -253,6 +257,7 @@ export default {
       clickedChemicalState: [],
       index: 0,
       finishedCard: false,
+      totalPoints: 0,
       swipeData: {
         title: "Tap the arrows to swipe in the direction of the correct change",
         cards: [
@@ -280,6 +285,12 @@ export default {
             removeToLeft: false,
             removeToRight: false,
           },
+          {
+            text: "Iron Bending",
+            correct: "Physical",
+            removeToLeft: false,
+            removeToRight: false,
+          },
         ],
         currentCardIndex: 0,
       },
@@ -290,8 +301,6 @@ export default {
       option.flip = !option.flip;
       // run a store function to save the clicked option
       this.clickedOptions.push(option);
-      console.log(option.flip);
-      console.log(this.clickedOptions);
     },
     goToNext() {
       const quiz = this.quizes[this.currentQuizIndex];
@@ -306,14 +315,19 @@ export default {
       const isCorrect = correctIds.every((id) => clickedIds.includes(id));
 
       if (isCorrect) {
+        this.totalPoints += 1; // Increment points if correct
         console.log("correct answer");
       } else {
+        this.totalPoints = this.totalPoints; // points remain the same if wrong
         console.log("wrong answer");
       }
+      console.log("Total points: ", this.totalPoints);
 
       this.clickedOptions = []; // Clear previous clicked options
-      if (this.currentQuizIndex === this.quizes.length) {
+      if (this.currentQuizIndex === this.quizes.length - 1) {
         this.showSwipeQuestion = true; //show swipe question after the last flip card
+        this.swipe = true;
+        console.log(this.swipe);
       } else if (this.currentQuizIndex < this.quizes.length) {
         this.currentQuizIndex++;
       } else {
@@ -321,10 +335,12 @@ export default {
       }
     },
     swipeLeft(index) {
+      if (this.swipeData.cards.length === 0) return;
       this.clickedPhysicalState.push(this.swipeData.cards[index]);
       this.swipeData.cards[index].removeToLeft = true;
-      console.log(this.swipeData.cards[index].removeToLeft);
-      console.log(this.swipeData.cards[index].removeToRight);
+      // console.log(this.swipeData.cards[index].removeToLeft);
+      // console.log(this.swipeData.cards[index].removeToRight);
+      // console.log(this.swipeData.cards.length);
 
       // this.swipeData.cards.shift();
       setTimeout(() => {
@@ -332,10 +348,42 @@ export default {
       }, 500);
       if (this.swipeData.cards.length === 1) {
         this.finishedCard = true;
+        this.swipe = false; // Hide swipe question after the last card
+        console.log(this.finishedCard);
+
+        const filtered = this.clickedPhysicalState.filter(
+          (card) => card.correct === "Physical"
+        );
+        console.log(filtered);
+        // Sort both arrays and compare
+        if (
+          filtered.length === this.clickedPhysicalState.length &&
+          [...filtered]
+            .sort()
+            .every(
+              (item, index) =>
+                item === [...this.clickedPhysicalState].sort()[index]
+            )
+        ) {
+          this.totalPoints += 1; // Increment points if correct
+          this.finishedCard = true;
+          this.swipe = false; // Hide swipe question after the last card
+          console.log(this.finishedCard);
+          console.log(this.totalPoints);
+        } else {
+          this.totalPoints = this.totalPoints; // points remain the same if wrong
+        }
+        console.log(this.finishedCard);
+        console.log(this.clickedPhysicalState);
+        // this.addpoint();
       }
-      // console.log(this.swipeData.cards[index]);
+
+      // console.log(correct);
+      console.log(typeof this.clickedPhysicalState);
     },
+    // chemical state
     swipeRight(index) {
+      if (this.swipeData.cards.length === 0) return;
       this.clickedChemicalState.push(this.swipeData.cards[index]);
       this.swipeData.cards[index].removeToRight = true;
       // console.log(this.swipeData.cards[index].remove);
@@ -346,6 +394,31 @@ export default {
       }, 500);
       if (this.swipeData.cards.length === 1) {
         this.finishedCard = true;
+        this.swipe = false; // Hide swipe question after the last card
+        console.log(this.finishedCard);
+
+        const filtered = this.clickedChemicalState.filter(
+          (card) => card.correct === "Chemical"
+        );
+        console.log(filtered);
+        // Sort both arrays and compare
+        if (
+          filtered.length === this.clickedChemicalState.length &&
+          [...filtered]
+            .sort()
+            .every(
+              (item, index) =>
+                item === [...this.clickedChemicalState].sort()[index]
+            )
+        ) {
+          this.totalPoints += 1; // Increment points if correct
+          this.finishedCard = true;
+          this.swipe = false; // Hide swipe question after the last card
+          console.log(this.totalPoints);
+        } else {
+          this.totalPoints = this.totalPoints; // points remain the same if wrong
+          console.log(this.totalPoints);
+        }
       }
       // console.log(this.swipeData.cards[index]);
     },
@@ -507,7 +580,7 @@ button {
 }
 .fade-left {
   animation: toLeft 0.5s ease;
-  opacity: 0.2;
+  /* opacity: 0.2; */
 }
 .fade-right {
   animation: toRight 0.5s ease;
@@ -538,6 +611,34 @@ button {
   background-color: #eeff00;
   opacity: 0.7;
 }
+.finished-card {
+  width: 80%;
+  margin-inline: auto;
+  height: 300px;
+  margin-top: 0;
+  font-size: 20px;
+  border: none;
+  border-radius: 10px;
+  background-color: #6ebaf8;
+  color: white;
+}
+.start {
+  background-color: #16157c;
+  color: white;
+  padding: 15px 30px;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  width: 30%;
+  text-decoration: none;
+  margin-inline: auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 20px;
+  font-weight: 300;
+}
 
 @keyframes toLeft {
   from {
@@ -545,7 +646,7 @@ button {
   }
   to {
     transform: translateX(-200px);
-    opacity: 0.2;
+    /* opacity: 0.2; */
   }
 }
 @keyframes toRight {
@@ -554,7 +655,7 @@ button {
   }
   to {
     transform: translateX(200px);
-    opacity: 0.2;
+    /* opacity: 0.2; */
   }
 }
 </style>

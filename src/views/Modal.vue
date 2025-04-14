@@ -59,7 +59,7 @@ img {
   left: 50%;
   transform: translate(-50%, -50%);
   background-color: rgb(166, 217, 247);
-  height: 60%;
+  height: 80vh;
   width: 70%;
   max-width: 800px;
   padding: 20px;
